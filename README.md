@@ -1,5 +1,7 @@
 # Friends with Cards (FWC)
 
+> **Learning Project**: This is a work-in-progress project focused on learning WebSockets, real-time communication, and modern JavaScript development. We're building this to explore browser-based multiplayer gaming and would love your feedback and suggestions!
+
 A browser-based, real-time multiplayer card game platform built with modern web technologies.
 
 ## Overview

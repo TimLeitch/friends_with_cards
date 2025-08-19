@@ -43,10 +43,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/friends-with-cards.git"
+    "url": "git+https://github.com/TimLeitch/friends-with-cards.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/friends-with-cards/issues"
+    "url": "https://github.com/TimLeitch/friends-with-cards/issues"
   },
-  "homepage": "https://github.com/yourusername/friends-with-cards#readme"
+  "homepage": "https://github.com/TimLeitch/friends-with-cards#readme"
 }

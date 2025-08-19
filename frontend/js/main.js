@@ -143,10 +143,12 @@ class FriendsWithCards {
         gameUI.updateUserIcon(data.user.username);
         document.getElementById("user-menu").style.display = "block";
         document.getElementById("auth-buttons").style.display = "none";
+        document.getElementById("create-game-btn").disabled = false;
       } else {
         // Not logged in, show login/register buttons
         document.getElementById("user-menu").style.display = "none";
         document.getElementById("auth-buttons").style.display = "flex";
+        document.getElementById("create-game-btn").disabled = true;
       }
     } catch (error) {
       console.error("Failed to check login status:", error);
@@ -474,11 +476,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const fetchActiveGames = async () => {
     try {
       const response = await fetch("/api/games");
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(
+          `HTTP ${response.status}: ${text || "failed to fetch"}`
+        );
+      }
       const games = await response.json();
+      if (!Array.isArray(games)) {
+        throw new Error("Invalid response format for games list");
+      }
       gameList.innerHTML = "";
       games.forEach((game) => {
         const li = document.createElement("li");
-        li.textContent = `${game.name} (${game.game_type}) - Created by ${game.creator} - ${game.current_players}/${game.max_players} players`;
+        const gameType = game.game_type || "unknown";
+        const players = `${game.current_players ?? 0}/${game.max_players ?? 0}`;
+        li.textContent = `${game.name} (${gameType}) - ${players} players`;
         if (game.has_password) {
           const lockIcon = document.createElement("span");
           lockIcon.textContent = " 🔒";
@@ -494,11 +507,33 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle create game form submission
   createGameForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const gameName = document.getElementById("game-name").value;
-    const gameType = document.getElementById("game-type").value;
-    const gamePassword = document.getElementById("game-password").value;
+    const formData = new FormData(createGameForm);
+    const nameEl = document.getElementById("game-name");
+    const typeEl = document.getElementById("game-type");
+    const pwdEl = document.getElementById("game-password");
+
+    const gameName = (
+      (formData.get("game-name") ?? nameEl?.value ?? "") + ""
+    ).trim();
+    const gameType =
+      (formData.get("game-type") ?? (typeEl?.value || "blackjack")) + "";
+    const gamePassword =
+      (formData.get("game-password") ?? pwdEl?.value ?? "") + "";
+
+    console.debug("CreateGame submit values", {
+      gameName,
+      gameType,
+      hasPassword: Boolean(gamePassword),
+    });
 
     try {
+      if (!gameName) {
+        console.error("Create game validation failed: name is required");
+        if (window.gameUI) {
+          window.gameUI.showNotification("Please enter a game name", "error");
+        }
+        return;
+      }
       const token = localStorage.getItem("token");
       const response = await fetch("/api/games", {
         method: "POST",

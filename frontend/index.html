@@ -8,6 +8,10 @@
       content="A real-time multiplayer card game platform."
     />
     <title>Friends with Cards</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🃏</text></svg>"
+    />
     <link rel="stylesheet" href="styles/main.css" />
     <script src="/socket.io/socket.io.js"></script>
   </head>
@@ -40,7 +44,7 @@
         <div class="game-lobby" id="game-lobby">
           <h2>Game Lobby</h2>
           <div class="lobby-controls">
-            <button id="create-game-btn" class="btn btn-primary">
+            <button id="create-game-btn" class="btn btn-primary" disabled>
               Create New Game
             </button>
             <button id="join-game-btn" class="btn btn-secondary">

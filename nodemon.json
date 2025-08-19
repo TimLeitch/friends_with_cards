@@ -1,0 +1,5 @@
+{
+  "events": {
+    "exit": "tree-kill $PPID"
+  }
+}

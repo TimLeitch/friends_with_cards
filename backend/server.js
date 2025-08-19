@@ -35,8 +35,18 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3001;
 
 // Session middleware configuration
+const useRedis = (process.env.USE_REDIS || "true").toLowerCase() !== "false";
+const sessionStore =
+  useRedis && redisClient ? new RedisStore({ client: redisClient }) : undefined; // express-session defaults to MemoryStore
+
+if (!sessionStore) {
+  logger.warn(
+    "Using in-memory session store (Redis disabled or not connected). Not for production use."
+  );
+}
+
 const sessionMiddleware = session({
-  store: new RedisStore({ client: redisClient }),
+  store: sessionStore,
   secret: process.env.SESSION_SECRET || "your-very-secret-key",
   resave: false,
   saveUninitialized: false,
@@ -62,6 +72,15 @@ app.use(
 );
 app.use(morgan("combined"));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Disable caching in development for static assets and API responses
+if (process.env.NODE_ENV !== "production") {
+  app.use((req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+  });
+}
 
 // API routes
 app.use("/api/auth", authRoutes);
@@ -69,7 +88,14 @@ app.use("/api/user", userRoutes);
 app.use("/api/games", gameRoutes);
 
 // Serve static files from the frontend directory
-app.use(express.static(path.join(__dirname, "../frontend")));
+app.use(
+  express.static(path.join(__dirname, "../frontend"), {
+    etag: false,
+    lastModified: false,
+    cacheControl: false,
+    maxAge: 0,
+  })
+);
 
 // Health check endpoint
 app.get("/health", async (req, res) => {
@@ -155,15 +181,32 @@ process.on("SIGINT", async () => {
 });
 
 if (require.main === module) {
+  const requiredEnvVars = [
+    "JWT_SECRET",
+    "DB_HOST",
+    "DB_PORT",
+    "DB_NAME",
+    "DB_USER",
+    "DB_PASSWORD",
+  ];
+  const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
+
+  if (missingEnvVars.length > 0) {
+    logger.error(
+      `Missing required environment variables: ${missingEnvVars.join(", ")}`
+    );
+    process.exit(1);
+  }
+
   server.listen(PORT, async () => {
     logger.info(`Server running on port ${PORT}`);
 
     // Test database connections on startup
-    try {
-      await testConnections();
+    const ok = await testConnections();
+    if (ok) {
       logger.info("All database connections established successfully");
-    } catch (error) {
-      logger.error("Failed to establish database connections:", error);
+    } else {
+      logger.error("One or more database connections failed. See logs above.");
     }
   });
 }

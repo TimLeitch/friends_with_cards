@@ -1,0 +1,52 @@
+{
+  "name": "friends-with-cards",
+  "version": "1.0.0",
+  "description": "A browser-based, real-time multiplayer card game platform for friends and family",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "echo \"Error: no linting configured\" && exit 1",
+    "build": "echo \"No build process configured yet\"",
+    "setup": "npm install && echo \"Setup complete\""
+  },
+  "keywords": [
+    "card-game",
+    "multiplayer",
+    "real-time",
+    "websockets",
+    "canvas",
+    "nodejs",
+    "friends",
+    "family",
+    "local-multiplayer"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "pg": "^8.11.3",
+    "redis": "^4.6.10",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/friends-with-cards.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/friends-with-cards/issues"
+  },
+  "homepage": "https://github.com/yourusername/friends-with-cards#readme"
+}

@@ -7,10 +7,12 @@ const router = express.Router();
 
 // User registration
 router.post("/register", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!username || !email || !password) {
-    return res.status(400).json({ error: "All fields are required" });
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ error: "Username and password are required" });
   }
 
   try {
@@ -22,17 +24,17 @@ router.post("/register", async (req, res) => {
       await client.query("BEGIN");
 
       const userInsertQuery = `
-        INSERT INTO users (username, email, password_hash)
-        VALUES ($1, $2, $3)
+        INSERT INTO users (username, password_hash)
+        VALUES ($1, $2)
         RETURNING id;
       `;
       const userResult = await client.query(userInsertQuery, [
         username,
-        email,
         passwordHash,
       ]);
       const userId = userResult.rows[0].id;
 
+      // Create default settings for the new user
       const settingsInsertQuery =
         "INSERT INTO user_settings (user_id) VALUES ($1);";
       await client.query(settingsInsertQuery, [userId]);
@@ -51,12 +53,10 @@ router.post("/register", async (req, res) => {
       });
     } catch (error) {
       await client.query("ROLLBACK");
-      logger.error("Registration failed:", error);
-      if (error.code === "23505") {
-        return res
-          .status(409)
-          .json({ error: "Username or email already exists" });
+      if (error.code === "23505" && error.constraint === "users_username_key") {
+        return res.status(409).json({ error: "Username already taken" });
       }
+      logger.error("Registration transaction failed:", error);
       res.status(500).json({ error: "Internal server error" });
     } finally {
       client.release();
@@ -69,15 +69,17 @@ router.post("/register", async (req, res) => {
 
 // User login
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ error: "Username and password are required" });
   }
 
   try {
-    const query = "SELECT id, password_hash FROM users WHERE email = $1";
-    const result = await pgPool.query(query, [email]);
+    const query = "SELECT id, password_hash FROM users WHERE username = $1";
+    const result = await pgPool.query(query, [username]);
 
     if (result.rows.length === 0) {
       return res.status(401).json({ error: "Invalid credentials" });

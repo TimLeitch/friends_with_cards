@@ -8,6 +8,7 @@ class FriendsWithCards {
     this.canvas = new Canvas("game-canvas");
 
     this.initialize();
+    this.checkLoginStatus();
   }
 
   // Initialize the application
@@ -95,6 +96,109 @@ class FriendsWithCards {
     this.socket.on("games_list_updated", (data) => {
       this.handleGamesListUpdated(data);
     });
+
+    // Settings form submission
+    document
+      .getElementById("settings-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const settings = Object.fromEntries(formData.entries());
+
+        try {
+          const response = await fetch("/api/user/settings", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(settings),
+          });
+
+          if (response.ok) {
+            gameUI.showNotification("Settings updated successfully", "success");
+            gameUI.hideModal("settings-modal");
+            this.user.settings = await response.json();
+          } else {
+            gameUI.showNotification("Failed to update settings", "error");
+          }
+        } catch (error) {
+          console.error("Failed to update settings:", error);
+          gameUI.showNotification("Failed to update settings", "error");
+        }
+      });
+  }
+
+  // Check login status
+  async checkLoginStatus() {
+    try {
+      const response = await fetch("/api/user/me");
+      if (response.ok) {
+        const data = await response.json();
+        this.user = data;
+        gameUI.updateUserIcon(data.user.username);
+        document.getElementById("user-menu").style.display = "block";
+        document.getElementById("auth-buttons").style.display = "none";
+      } else {
+        // Not logged in, show login/register buttons
+        document.getElementById("user-menu").style.display = "none";
+        document.getElementById("auth-buttons").style.display = "flex";
+      }
+    } catch (error) {
+      console.error("Failed to check login status:", error);
+    }
+  }
+
+  // Login user
+  async login(username, password) {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        gameUI.showNotification("Login failed", "error");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      gameUI.showNotification("Login failed", "error");
+    }
+  }
+
+  // Register user
+  async register(username, password) {
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        gameUI.showNotification("Registration failed", "error");
+      }
+    } catch (error) {
+      console.error("Registration failed:", error);
+      gameUI.showNotification("Registration failed", "error");
+    }
+  }
+
+  // Logout user
+  async logout() {
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        gameUI.showNotification("Logout failed", "error");
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      gameUI.showNotification("Logout failed", "error");
+    }
   }
 
   // Handle successful connection

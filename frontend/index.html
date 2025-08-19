@@ -15,6 +15,20 @@
             >Disconnected</span
           >
         </div>
+        <div class="auth-buttons" id="auth-buttons">
+          <button class="btn btn-secondary" id="login-btn-main">Login</button>
+          <button class="btn btn-primary" id="register-btn-main">
+            Register
+          </button>
+        </div>
+        <div class="user-menu" id="user-menu" style="display: none">
+          <button class="user-icon" id="user-icon-btn"></button>
+          <div class="dropdown-menu" id="dropdown-menu">
+            <a href="#" id="profile-btn">Profile</a>
+            <a href="#" id="settings-btn">Settings</a>
+            <a href="#" id="logout-btn">Logout</a>
+          </div>
+        </div>
       </header>
 
       <main class="game-container">
@@ -127,6 +141,126 @@
               Cancel
             </button>
             <button type="submit" class="btn btn-primary">Join Game</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Auth Modals -->
+    <div id="login-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Login</h3>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-username">Username:</label>
+            <input type="text" id="login-username" name="username" required />
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password:</label>
+            <input
+              type="password"
+              id="login-password"
+              name="password"
+              required
+            />
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="cancel-login-btn"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Login</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="register-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Register</h3>
+        <form id="register-form">
+          <div class="form-group">
+            <label for="register-username">Username:</label>
+            <input
+              type="text"
+              id="register-username"
+              name="username"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="register-password">Password:</label>
+            <input
+              type="password"
+              id="register-password"
+              name="password"
+              required
+            />
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="cancel-register-btn"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Register</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- User Modals -->
+    <div id="profile-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>User Profile</h3>
+        <div id="profile-content">
+          <!-- Profile content will be populated here -->
+        </div>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="close-profile-btn"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="settings-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Settings</h3>
+        <form id="settings-form">
+          <div class="form-group">
+            <label for="theme-select">Theme:</label>
+            <select id="theme-select" name="theme">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="card-background-input">Card Background:</label>
+            <input
+              type="text"
+              id="card-background-input"
+              name="card_background"
+            />
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="close-settings-btn"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Save</button>
           </div>
         </form>
       </div>

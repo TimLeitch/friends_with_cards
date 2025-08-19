@@ -19,13 +19,14 @@ describe("Auth API", () => {
 
   const testUser = {
     username: `testuser_${Date.now()}`,
-    email: `test_${Date.now()}@example.com`,
     password: "password123",
   };
 
   // Clean up the user created during the test
   afterEach(async () => {
-    await pgPool.query("DELETE FROM users WHERE email = $1", [testUser.email]);
+    await pgPool.query("DELETE FROM users WHERE username = $1", [
+      testUser.username,
+    ]);
   });
 
   it("should register a new user", async () => {
@@ -36,11 +37,20 @@ describe("Auth API", () => {
     expect(res.body).toHaveProperty("userId");
   });
 
-  it("should log in an existing user", async () => {
+  it("should not register a user with a duplicate username", async () => {
     await agent.post("/api/auth/register").send(testUser).expect(201);
     const res = await agent
+      .post("/api/auth/register")
+      .send(testUser)
+      .expect(409);
+    expect(res.body.error).toBe("Username already taken");
+  });
+
+  it("should login a registered user", async () => {
+    await agent.post("/api/auth/register").send(testUser);
+    const res = await agent
       .post("/api/auth/login")
-      .send({ email: testUser.email, password: testUser.password })
+      .send({ username: testUser.username, password: testUser.password })
       .expect(200);
     expect(res.body).toHaveProperty("userId");
   });
@@ -49,7 +59,7 @@ describe("Auth API", () => {
     await agent.post("/api/auth/register").send(testUser).expect(201);
     await agent
       .post("/api/auth/login")
-      .send({ email: testUser.email, password: testUser.password })
+      .send({ username: testUser.username, password: testUser.password })
       .expect(200);
     await agent.post("/api/auth/logout").expect(200);
   });
@@ -59,7 +69,6 @@ describe("User API", () => {
   let agent;
   const testUser = {
     username: `testuser2_${Date.now()}`,
-    email: `test2_${Date.now()}@example.com`,
     password: "password123",
   };
 
@@ -69,13 +78,18 @@ describe("User API", () => {
   });
 
   afterAll(async () => {
-    await pgPool.query("DELETE FROM users WHERE email = $1", [testUser.email]);
+    await pgPool.query("DELETE FROM users WHERE username = $1", [
+      testUser.username,
+    ]);
   });
 
   it("should get the current user's data", async () => {
     const res = await agent.get("/api/user/me").expect(200);
-    expect(res.body).toHaveProperty("user");
-    expect(res.body.user.email).toBe(testUser.email);
+
+    expect(res.body.user).toBeDefined();
+    expect(res.body.settings).toBeDefined();
+    expect(res.body.stats).toBeDefined();
+    expect(res.body.user.username).toBe(testUser.username);
   });
 
   it("should update the user's settings", async () => {

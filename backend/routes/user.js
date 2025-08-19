@@ -17,7 +17,7 @@ const isAuthenticated = (req, res, next) => {
 router.get("/me", isAuthenticated, async (req, res) => {
   try {
     const userId = req.session.userId;
-    const userQuery = "SELECT id, username, email FROM users WHERE id = $1";
+    const userQuery = "SELECT id, username FROM users WHERE id = $1";
     const settingsQuery = "SELECT * FROM user_settings WHERE user_id = $1";
     const statsQuery = "SELECT * FROM user_game_stats WHERE user_id = $1";
 
@@ -29,11 +29,13 @@ router.get("/me", isAuthenticated, async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.json({
+    const user = {
       user: userResult.rows[0],
-      settings: settingsResult.rows[0],
-      stats: statsResult.rows[0],
-    });
+      settings: settingsResult.rows[0] || {},
+      stats: statsResult.rows[0] || {},
+    };
+
+    res.status(200).json(user);
   } catch (error) {
     logger.error("Failed to get user data:", error);
     res.status(500).json({ error: "Internal server error" });

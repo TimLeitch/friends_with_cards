@@ -41,10 +41,126 @@ class GameUI {
         this.handleJoinGame();
       });
 
+    // Auth form submissions
+    document.getElementById("login-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = e.target.username.value;
+      const password = e.target.password.value;
+      window.app.login(username, password);
+    });
+
+    document.getElementById("register-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = e.target.username.value;
+      const password = e.target.password.value;
+      window.app.register(username, password);
+    });
+
     // Game controls
     document.getElementById("leave-game-btn").addEventListener("click", () => {
       this.leaveGame();
     });
+
+    // User menu controls
+    const userMenu = document.getElementById("user-menu");
+    if (userMenu) {
+      const userIconBtn = document.getElementById("user-icon-btn");
+      userIconBtn.addEventListener("click", () => {
+        userMenu.classList.toggle("active");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!userMenu.contains(e.target)) {
+          userMenu.classList.remove("active");
+        }
+      });
+    }
+
+    // Modal and dropdown menu buttons
+    document.getElementById("profile-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      this.populateProfileModal();
+      this.showModal("profile-modal");
+    });
+
+    document.getElementById("settings-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      this.populateSettingsModal();
+      this.showModal("settings-modal");
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      window.app.logout();
+    });
+
+    document
+      .getElementById("close-profile-btn")
+      .addEventListener("click", () => {
+        this.hideModal("profile-modal");
+      });
+
+    document
+      .getElementById("close-settings-btn")
+      .addEventListener("click", () => {
+        this.hideModal("settings-modal");
+      });
+
+    // Auth modal controls
+    document.getElementById("login-btn-main").addEventListener("click", () => {
+      this.showModal("login-modal");
+    });
+
+    document
+      .getElementById("register-btn-main")
+      .addEventListener("click", () => {
+        this.showModal("register-modal");
+      });
+
+    document
+      .getElementById("cancel-login-btn")
+      .addEventListener("click", () => {
+        this.hideModal("login-modal");
+      });
+
+    document
+      .getElementById("cancel-register-btn")
+      .addEventListener("click", () => {
+        this.hideModal("register-modal");
+      });
+  }
+
+  // Populate profile modal with user data
+  populateProfileModal() {
+    const profileContent = document.getElementById("profile-content");
+    const user = window.app.user.user;
+    const stats = window.app.user.stats;
+    profileContent.innerHTML = `
+      <p><strong>Username:</strong> ${user.username}</p>
+      <p><strong>Email:</strong> ${user.email}</p>
+      <p><strong>Total Wins:</strong> ${stats.total_games_won}</p>
+    `;
+  }
+
+  // Populate settings modal with user data
+  populateSettingsModal() {
+    const settings = window.app.user.settings;
+    document.getElementById("theme-select").value = settings.theme;
+    document.getElementById("card-background-input").value =
+      settings.card_background;
+  }
+
+  // Update user icon with initials
+  updateUserIcon(username) {
+    const userIconBtn = document.getElementById("user-icon-btn");
+    if (userIconBtn) {
+      const initials = username
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase();
+      userIconBtn.textContent = initials;
+    }
   }
 
   // Show modal

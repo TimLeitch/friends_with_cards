@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Friends with Cards</title>
+    <link rel="stylesheet" href="styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="game-header">
+        <h1>Friends with Cards</h1>
+        <div class="connection-status">
+          <span id="status-indicator" class="status-disconnected"
+            >Disconnected</span
+          >
+        </div>
+      </header>
+
+      <main class="game-container">
+        <div class="game-lobby" id="game-lobby">
+          <h2>Game Lobby</h2>
+          <div class="lobby-controls">
+            <button id="create-game-btn" class="btn btn-primary">
+              Create New Game
+            </button>
+            <button id="join-game-btn" class="btn btn-secondary">
+              Join Game
+            </button>
+          </div>
+          <div class="active-games" id="active-games">
+            <h3>Active Games</h3>
+            <div id="games-list" class="games-list">
+              <!-- Games will be populated here -->
+            </div>
+          </div>
+        </div>
+
+        <div class="game-board" id="game-board" style="display: none">
+          <div class="game-info">
+            <h3 id="game-title">Game Title</h3>
+            <div class="game-status" id="game-status">
+              Waiting for players...
+            </div>
+          </div>
+
+          <div class="game-area">
+            <div class="opponent-area" id="opponent-area">
+              <!-- Opponent cards will appear here -->
+            </div>
+
+            <div class="table-area" id="table-area">
+              <!-- Cards on the table will appear here -->
+            </div>
+
+            <div class="player-area" id="player-area">
+              <!-- Player's cards will appear here -->
+            </div>
+          </div>
+
+          <div class="game-controls">
+            <button id="leave-game-btn" class="btn btn-danger">
+              Leave Game
+            </button>
+          </div>
+        </div>
+      </main>
+
+      <div
+        id="game-canvas-container"
+        class="canvas-container"
+        style="display: none"
+      >
+        <canvas id="game-canvas" width="800" height="600"></canvas>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="create-game-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Create New Game</h3>
+        <form id="create-game-form">
+          <div class="form-group">
+            <label for="game-name">Game Name:</label>
+            <input type="text" id="game-name" name="game-name" required />
+          </div>
+          <div class="form-group">
+            <label for="game-type">Game Type:</label>
+            <select id="game-type" name="game-type" required>
+              <option value="blackjack">Blackjack</option>
+              <option value="war">War</option>
+              <option value="go-fish">Go Fish</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="max-players">Max Players:</label>
+            <input
+              type="number"
+              id="max-players"
+              name="max-players"
+              min="2"
+              max="8"
+              value="4"
+              required
+            />
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="cancel-create" class="btn btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Create Game</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="join-game-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Join Game</h3>
+        <form id="join-game-form">
+          <div class="form-group">
+            <label for="game-id">Game ID:</label>
+            <input type="text" id="game-id" name="game-id" required />
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="cancel-join" class="btn btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Join Game</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/game-engine.js"></script>
+    <script src="js/games/blackjack.js"></script>
+    <script src="js/game-factory.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

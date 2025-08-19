@@ -128,6 +128,60 @@ class GameUI {
       .addEventListener("click", () => {
         this.hideModal("register-modal");
       });
+
+    // Theme switcher
+    const themeSwitch = document.getElementById("theme-switch");
+    if (themeSwitch) {
+      themeSwitch.addEventListener("change", () => {
+        this.toggleTheme();
+      });
+    }
+
+    this.loadTheme();
+  }
+
+  // Toggle theme
+  toggleTheme() {
+    const isDarkMode = document.body.classList.toggle("dark-mode");
+    const newTheme = isDarkMode ? "dark" : "light";
+    localStorage.setItem("theme", newTheme);
+    this.updateThemeSwitch();
+    this.saveThemePreference(newTheme);
+  }
+
+  // Save theme preference to the server
+  async saveThemePreference(theme) {
+    if (!window.app.user) return;
+
+    try {
+      await fetch("/api/user/settings", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${window.app.user.token}`,
+        },
+        body: JSON.stringify({ theme }),
+      });
+    } catch (error) {
+      console.error("Failed to save theme preference:", error);
+    }
+  }
+
+  // Load theme from local storage
+  loadTheme() {
+    const theme = localStorage.getItem("theme");
+    if (theme === "dark") {
+      document.body.classList.add("dark-mode");
+    }
+    this.updateThemeSwitch();
+  }
+
+  // Update theme switch state
+  updateThemeSwitch() {
+    const themeSwitch = document.getElementById("theme-switch");
+    if (themeSwitch) {
+      themeSwitch.checked = document.body.classList.contains("dark-mode");
+    }
   }
 
   // Populate profile modal with user data
@@ -141,9 +195,11 @@ class GameUI {
   // Populate settings modal with user data
   populateSettingsModal() {
     const settings = window.app.user.settings;
-    document.getElementById("theme-select").value = settings.theme;
-    document.getElementById("card-background-input").value =
-      settings.card_background;
+    if (settings) {
+      document.getElementById("card-background-input").value =
+        settings.card_background || "";
+    }
+    this.updateThemeSwitch();
   }
 
   // Update user icon with initials

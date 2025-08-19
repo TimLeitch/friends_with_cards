@@ -7,9 +7,54 @@
 
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--background-gradient);
   min-height: 100vh;
-  color: #333;
+  color: var(--text-color);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+:root {
+  --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --text-color: #333;
+  --header-bg: rgba(255, 255, 255, 0.95);
+  --header-text: #4a5568;
+  --modal-bg: white;
+  --modal-text: #4a5568;
+  --input-border: #e2e8f0;
+  --input-focus-border: #667eea;
+  --card-bg: #f7fafc;
+  --card-border: #e2e8f0;
+  --card-hover-border: #667eea;
+  --card-shadow: rgba(102, 126, 234, 0.2);
+  --button-primary-bg: #667eea;
+  --button-primary-hover-bg: #5a67d8;
+  --button-secondary-bg: #718096;
+  --button-secondary-hover-bg: #4a5568;
+  --dropdown-bg: white;
+  --dropdown-text-color: #4a5568;
+  --dropdown-hover-bg: #f7fafc;
+}
+
+body.dark-mode {
+  --background-gradient: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  --text-color: #e2e8f0;
+  --header-bg: rgba(26, 32, 44, 0.95);
+  --header-text: #e2e8f0;
+  --modal-bg: #2d3748;
+  --modal-text: #e2e8f0;
+  --input-border: #4a5568;
+  --input-focus-border: #63b3ed;
+  --card-bg: #1a202c;
+  --card-border: #4a5568;
+  --card-hover-border: #63b3ed;
+  --card-shadow: rgba(99, 179, 237, 0.2);
+  --button-primary-bg: #4299e1;
+  --button-primary-hover-bg: #3182ce;
+  --button-secondary-bg: #4a5568;
+  --button-secondary-hover-bg: #2d3748;
+  --dropdown-bg: #2d3748;
+  --dropdown-text-color: #e2e8f0;
+  --dropdown-hover-bg: #4a5568;
 }
 
 #app {
@@ -20,17 +65,19 @@ body {
 
 /* Header styles */
 .game-header {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--header-bg);
   backdrop-filter: blur(10px);
   padding: 1rem 2rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative; /* Ensure z-index is effective */
+  z-index: 2100; /* Higher than modals */
 }
 
 .game-header h1 {
-  color: #4a5568;
+  color: var(--header-text);
   font-size: 2rem;
   font-weight: 700;
 }
@@ -74,6 +121,7 @@ body {
 /* User menu */
 .user-menu {
   position: relative;
+  z-index: 1100;
 }
 
 .user-icon {
@@ -96,7 +144,7 @@ body {
   position: absolute;
   top: 50px;
   right: 0;
-  background: white;
+  background: var(--dropdown-bg);
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   width: 150px;
@@ -107,13 +155,13 @@ body {
 .dropdown-menu a {
   display: block;
   padding: 0.75rem 1rem;
-  color: #4a5568;
+  color: var(--dropdown-text-color);
   text-decoration: none;
   transition: background 0.2s ease;
 }
 
 .dropdown-menu a:hover {
-  background: #f7fafc;
+  background: var(--dropdown-hover-bg);
 }
 
 .user-menu.active .dropdown-menu {
@@ -343,7 +391,7 @@ body {
 }
 
 .modal-content {
-  background: white;
+  background: var(--modal-bg);
   border-radius: 15px;
   padding: 2rem;
   max-width: 500px;
@@ -352,7 +400,7 @@ body {
 }
 
 .modal-content h3 {
-  color: #4a5568;
+  color: var(--modal-text);
   margin-bottom: 1.5rem;
   text-align: center;
   font-size: 1.5rem;
@@ -365,7 +413,7 @@ body {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #4a5568;
+  color: var(--modal-text);
   font-weight: 600;
 }
 
@@ -373,16 +421,18 @@ body {
 .form-group select {
   width: 100%;
   padding: 0.75rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--input-border);
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s ease;
+  background-color: var(--card-bg);
+  color: var(--text-color);
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--input-focus-border);
 }
 
 .modal-actions {
@@ -390,6 +440,68 @@ body {
   gap: 1rem;
   justify-content: flex-end;
   margin-top: 2rem;
+}
+
+/* Theme switcher */
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #2196f3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196f3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 
 /* Responsive design */

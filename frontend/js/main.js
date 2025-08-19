@@ -133,6 +133,13 @@ class FriendsWithCards {
       if (response.ok) {
         const data = await response.json();
         this.user = data;
+
+        // Apply theme from user settings
+        if (this.user.settings && this.user.settings.theme) {
+          localStorage.setItem("theme", this.user.settings.theme);
+          gameUI.loadTheme();
+        }
+
         gameUI.updateUserIcon(data.user.username);
         document.getElementById("user-menu").style.display = "block";
         document.getElementById("auth-buttons").style.display = "none";

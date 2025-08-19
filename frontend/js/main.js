@@ -456,6 +456,78 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  const createGameBtn = document.getElementById("create-game-btn");
+  const createGameModal = document.getElementById("create-game-modal");
+  const cancelCreateBtn = document.getElementById("cancel-create");
+  const gameList = document.getElementById("game-list");
+  const createGameForm = document.getElementById("create-game-form");
+
+  createGameBtn.addEventListener("click", () => {
+    createGameModal.style.display = "block";
+  });
+
+  cancelCreateBtn.addEventListener("click", () => {
+    createGameModal.style.display = "none";
+  });
+
+  // Fetch and display active games
+  const fetchActiveGames = async () => {
+    try {
+      const response = await fetch("/api/games");
+      const games = await response.json();
+      gameList.innerHTML = "";
+      games.forEach((game) => {
+        const li = document.createElement("li");
+        li.textContent = `${game.name} (${game.game_type}) - Created by ${game.creator} - ${game.current_players}/${game.max_players} players`;
+        if (game.has_password) {
+          const lockIcon = document.createElement("span");
+          lockIcon.textContent = " 🔒";
+          li.appendChild(lockIcon);
+        }
+        gameList.appendChild(li);
+      });
+    } catch (err) {
+      console.error("Error fetching active games:", err);
+    }
+  };
+
+  // Handle create game form submission
+  createGameForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const gameName = document.getElementById("game-name").value;
+    const gameType = document.getElementById("game-type").value;
+    const gamePassword = document.getElementById("game-password").value;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/games", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: gameName,
+          game_type: gameType,
+          password: gamePassword,
+        }),
+      });
+      if (response.ok) {
+        fetchActiveGames();
+        createGameForm.reset();
+        createGameModal.style.display = "none";
+      } else {
+        const err = await response.json();
+        console.error("Error creating game:", err.error);
+      }
+    } catch (err) {
+      console.error("Error creating game:", err);
+    }
+  });
+
+  // Initial fetch of active games
+  fetchActiveGames();
+
   console.log("Friends with Cards initialized successfully!");
 });
 

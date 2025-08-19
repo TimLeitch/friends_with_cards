@@ -18,6 +18,7 @@ const {
 
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
+const gameRoutes = require("./routes/games");
 
 const app = express();
 const server = createServer(app);
@@ -65,6 +66,7 @@ app.use(express.json());
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/games", gameRoutes);
 
 // Serve static files from the frontend directory
 app.use(express.static(path.join(__dirname, "../frontend")));

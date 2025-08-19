@@ -560,3 +560,38 @@ input:checked + .slider:before {
 .mb-2 {
   margin-bottom: 1rem;
 }
+
+/* Game Lobbies */
+#game-lobbies-container {
+  margin-bottom: 2rem;
+}
+
+#game-list {
+  list-style: none;
+  padding: 0;
+}
+
+#game-list li {
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Create Game Form */
+#create-game-container {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+#create-game-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#create-game-form input,
+#create-game-form select,
+#create-game-form button {
+  padding: 0.5rem;
+  font-size: 1rem;
+}

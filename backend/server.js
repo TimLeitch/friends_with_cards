@@ -4,11 +4,20 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const session = require("express-session");
+const RedisStore = require("connect-redis").default;
 const path = require("path");
 require("dotenv").config();
 
 const logger = require("./utils/logger");
-const { testConnections, closeConnections } = require("./db/config");
+const {
+  redisClient,
+  testConnections,
+  closeConnections,
+} = require("./db/config");
+
+const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/user");
 
 const app = express();
 const server = createServer(app);
@@ -24,6 +33,21 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3001;
 
+// Session middleware configuration
+const sessionMiddleware = session({
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET || "your-very-secret-key",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24, // 24 hours
+  },
+});
+
+app.use(sessionMiddleware);
+
 // Middleware
 app.use(helmet());
 app.use(
@@ -37,6 +61,10 @@ app.use(
 );
 app.use(morgan("combined"));
 app.use(express.json());
+
+// API routes
+app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 
 // Serve static files from the frontend directory
 app.use(express.static(path.join(__dirname, "../frontend")));
@@ -74,11 +102,6 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend", "index.html"));
 });
 
-// Catch-all route to serve the frontend's index.html
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend", "index.html"));
-});
-
 // Socket.io connection handling
 io.on("connection", (socket) => {
   logger.info(`Client connected: ${socket.id}`);
@@ -101,8 +124,13 @@ app.use((err, req, res, next) => {
 });
 
 // 404 handler
-app.use("*", (req, res) => {
+app.use((req, res, next) => {
   res.status(404).json({ error: "Route not found" });
+});
+
+// Catch-all route to serve the frontend's index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend", "index.html"));
 });
 
 // Graceful shutdown

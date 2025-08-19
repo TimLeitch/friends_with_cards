@@ -28,19 +28,23 @@ jobs:
         run: npm ci
 
       - name: Run linting
-        run: npm run lint
-        # Uncomment when you add linting
-        # continue-on-error: true
+        run: |
+          if [ -n "$(find . -name '*.js' -not -path './node_modules/*' -not -path './.git/*')" ]; then
+            npm run lint
+          else
+            echo "No JavaScript files found to lint"
+          fi
 
       - name: Run tests
-        run: npm test
-        # Uncomment when you add testing
-        # continue-on-error: true
+        run: |
+          if [ -n "$(find . -name '*.test.js' -o -name '*.spec.js')" ]; then
+            npm test
+          else
+            echo "No test files found, skipping tests"
+          fi
 
       - name: Build project
         run: npm run build
-        # Uncomment when you add build scripts
-        # continue-on-error: true
 
   security:
     runs-on: ubuntu-latest

@@ -132,14 +132,10 @@ class GameUI {
 
   // Populate profile modal with user data
   populateProfileModal() {
-    const profileContent = document.getElementById("profile-content");
-    const user = window.app.user.user;
-    const stats = window.app.user.stats;
-    profileContent.innerHTML = `
-      <p><strong>Username:</strong> ${user.username}</p>
-      <p><strong>Email:</strong> ${user.email}</p>
-      <p><strong>Total Wins:</strong> ${stats.total_games_won}</p>
-    `;
+    if (window.app.user) {
+      document.getElementById("profile-username").textContent =
+        window.app.user.user.username;
+    }
   }
 
   // Populate settings modal with user data

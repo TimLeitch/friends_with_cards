@@ -256,6 +256,15 @@ class FriendsWithCards {
 
     // Update games list
     this.loadGamesList();
+
+    // Auto-join the created game via REST in case sockets are not wiring join yet
+    if (data && data.id) {
+      fetch(`/api/games/${encodeURIComponent(data.id)}/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      }).catch(() => {});
+    }
   }
 
   // Handle game joined event
@@ -491,12 +500,28 @@ document.addEventListener("DOMContentLoaded", () => {
         const li = document.createElement("li");
         const gameType = game.game_type || "unknown";
         const players = `${game.current_players ?? 0}/${game.max_players ?? 0}`;
-        li.textContent = `${game.name} (${gameType}) - ${players} players`;
+
+        const infoSpan = document.createElement("span");
+        infoSpan.textContent = `${game.name} (${gameType}) - ${players} players`;
+        li.appendChild(infoSpan);
+
         if (game.has_password) {
           const lockIcon = document.createElement("span");
           lockIcon.textContent = " 🔒";
           li.appendChild(lockIcon);
         }
+
+        const joinBtn = document.createElement("button");
+        joinBtn.textContent = "Join";
+        joinBtn.className = "btn btn-primary btn-sm";
+        joinBtn.style.marginLeft = "8px";
+        joinBtn.addEventListener("click", () => {
+          if (window.gameUI) {
+            window.gameUI.joinGame(game.id);
+          }
+        });
+        li.appendChild(joinBtn);
+
         gameList.appendChild(li);
       });
     } catch (err) {

@@ -27,12 +27,7 @@ class GameUI {
     });
 
     // Form submissions
-    document
-      .getElementById("create-game-form")
-      .addEventListener("submit", (e) => {
-        e.preventDefault();
-        this.handleCreateGame();
-      });
+    // The create-game form is handled in main.js; avoid duplicate listeners here
 
     document
       .getElementById("join-game-form")
@@ -231,36 +226,53 @@ class GameUI {
     }
   }
 
-  // Handle create game form submission
-  handleCreateGame() {
-    const formData = new FormData(document.getElementById("create-game-form"));
-    const gameData = {
-      name: formData.get("game-name"),
-      type: formData.get("game-type"),
-      maxPlayers: parseInt(formData.get("max-players")),
-    };
-
-    // Emit create game event
-    if (window.gameSocket) {
-      window.gameSocket.emit("create_game", gameData);
-    }
-
-    this.hideModal("create-game-modal");
-    document.getElementById("create-game-form").reset();
-  }
+  // Create-game handled in main.js
 
   // Handle join game form submission
-  handleJoinGame() {
-    const formData = new FormData(document.getElementById("join-game-form"));
-    const gameId = formData.get("game-id");
+  async handleJoinGame() {
+    const form = document.getElementById("join-game-form");
+    const formData = new FormData(form);
+    const gameId = (formData.get("game-id") || "").toString().trim();
+    const password = (formData.get("join-password") || "").toString();
 
-    // Emit join game event
-    if (window.gameSocket) {
-      window.gameSocket.emit("join_game", { gameId });
+    if (!gameId) {
+      this.showNotification("Please enter a game id", "error");
+      return;
     }
 
-    this.hideModal("join-game-modal");
-    document.getElementById("join-game-form").reset();
+    try {
+      const response = await fetch(
+        `/api/games/${encodeURIComponent(gameId)}/join`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password }),
+        }
+      );
+      if (!response.ok) {
+        const err = await response
+          .json()
+          .catch(() => ({ error: "Join failed" }));
+        this.showNotification(err.error || "Failed to join game", "error");
+        return;
+      }
+      const data = await response.json();
+      this.showNotification(`Joined game "${data.name}"`, "success");
+      this.showGameView({
+        id: data.id,
+        name: data.name,
+        type: data.game_type,
+        status: data.status,
+        players: data.players || [],
+      });
+    } catch (e) {
+      console.error("Join game error", e);
+      this.showNotification("Failed to join game", "error");
+      return;
+    } finally {
+      this.hideModal("join-game-modal");
+      form.reset();
+    }
   }
 
   // Switch to game view
@@ -464,9 +476,37 @@ class GameUI {
   }
 
   // Join a specific game
-  joinGame(gameId) {
-    if (window.gameSocket) {
-      window.gameSocket.emit("join_game", { gameId });
+  async joinGame(gameId) {
+    const formPasswordEl = document.getElementById("join-password");
+    const password = formPasswordEl ? formPasswordEl.value : "";
+    try {
+      const response = await fetch(
+        `/api/games/${encodeURIComponent(gameId)}/join`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password }),
+        }
+      );
+      if (!response.ok) {
+        const err = await response
+          .json()
+          .catch(() => ({ error: "Join failed" }));
+        this.showNotification(err.error || "Failed to join game", "error");
+        return;
+      }
+      const data = await response.json();
+      this.showNotification(`Joined game "${data.name}"`, "success");
+      this.showGameView({
+        id: data.id,
+        name: data.name,
+        type: data.game_type,
+        status: data.status,
+        players: data.players || [],
+      });
+    } catch (e) {
+      console.error("Join game error", e);
+      this.showNotification("Failed to join game", "error");
     }
   }
 

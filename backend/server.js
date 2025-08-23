@@ -25,10 +25,12 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.CORS_ORIGIN?.split(",") || [
+      "http://localhost:3000",
       "http://localhost:3001",
       "http://localhost:8080",
     ],
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
@@ -64,6 +66,7 @@ app.use(helmet());
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN?.split(",") || [
+      "http://localhost:3000",
       "http://localhost:3001",
       "http://localhost:8080",
     ],
